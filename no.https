@@ -1,0 +1,143 @@
+-- Advanced Chat Bypass Script with GUI for Roblox
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local chatService = game:GetService("TextChatService")
+local CoreGui = game:GetService("CoreGui")
+
+-- Bypass methods
+local bypassMethods = {
+    ZeroWidthSpace = function(text)
+        local bypassedText = ""
+        for i = 1, #text do
+            local char = text:sub(i, i)
+            bypassedText = bypassedText .. char .. "⁰" -- Inserting a zero-width space
+        end
+        return bypassedText
+    end,
+
+    EmojiReplacement = function(text)
+        local emojiMap = {
+            ["A"] = "🅰️", ["B"] = "🅱️", ["C"] = "🅲️", ["D"] = "🅳️", ["E"] = "🅴️",
+            ["F"] = "🅵️", ["G"] = "🅶️", ["H"] = "🅷️", ["I"] = "🅸️", ["J"] = "🅹️",
+            ["K"] = "🅺️", ["L"] = "🅻️", ["M"] = "🅼️", ["N"] = "🅽️", ["O"] = "🅾️",
+            ["P"] = "🅿️", ["Q"] = "🆀️", ["R"] = "🆁️", ["S"] = "🆂️", ["T"] = "🆃️",
+            ["U"] = "🆄️", ["V"] = "🆅️", ["W"] = "🆆️", ["X"] = "🆇️", ["Y"] = "🆈️",
+            ["Z"] = "🆉️", ["a"] = "🄰️", ["b"] = "🄱️", ["c"] = "🄲️", ["d"] = "🄳️",
+            ["e"] = "🄴️", ["f"] = "🄵️", ["g"] = "🄶️", ["h"] = "🄷️", ["i"] = "🄸️",
+            ["j"] = "🄹️", ["k"] = "🄺️", ["l"] = "🄻️", ["m"] = "🄼️", ["n"] = "🄽️",
+            ["o"] = "🄾️", ["p"] = "🄿️", ["q"] = "🅀️", ["r"] = "🅁️", ["s"] = "🅂️",
+            ["t"] = "🅃️", ["u"] = "🅄️", ["v"] = "🅅️", ["w"] = "🅆️", ["x"] = "🅇️",
+            ["y"] = "🅈️", ["z"] = "🅉️"
+        }
+        local bypassedText = ""
+        for i = 1, #text do
+            local char = text:sub(i, i)
+            bypassedText = bypassedText .. (emojiMap[char] or char)
+        end
+        return bypassedText
+    end
+}
+
+-- Current bypass method
+local currentMethod = bypassMethods.ZeroWidthSpace
+
+-- Toggle variable
+local isBypassEnabled = true
+
+-- Function to toggle bypass
+local function toggleBypass()
+    isBypassEnabled = not isBypassEnabled
+    updateGui()
+end
+
+-- Function to change bypass method
+local function changeBypassMethod(methodName)
+    if bypassMethods[methodName] then
+        currentMethod = bypassMethods[methodName]
+        updateGui()
+    else
+        warn("Invalid bypass method")
+    end
+end
+
+-- Function to bypass chat filter
+local function bypassChatFilter(text)
+    if isBypassEnabled then
+        return currentMethod(text)
+    else
+        return text
+    end
+end
+
+-- Connect to player's Chatted event
+local function onChatted(message, recipient)
+    local bypassedMessage = bypassChatFilter(message)
+    chatService:Chat(bypassedMessage)
+end
+
+player.Chatted:Connect(onChatted)
+
+-- Create GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = CoreGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 200, 0, 100)
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BorderSizePixel = 1
+mainFrame.BorderColor3 = Color3.fromRGB(50, 50, 50)
+mainFrame.Parent = screenGui
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 25)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Text = "Chat Bypass"
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextSize = 14
+titleLabel.Parent = mainFrame
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(1, 0, 0, 25)
+toggleButton.Position = UDim2.new(0, 0, 0, 25)
+toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Text = "Toggle Bypass"
+toggleButton.Font = Enum.Font.SourceSans
+toggleButton.TextSize = 14
+toggleButton.MouseButton1Click:Connect(toggleBypass)
+toggleButton.Parent = mainFrame
+
+local methodLabel = Instance.new("TextLabel")
+methodLabel.Size = UDim2.new(1, 0, 0, 25)
+methodLabel.Position = UDim2.new(0, 0, 0, 50)
+methodLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+methodLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+methodLabel.Text = "Current Method: ZeroWidthSpace"
+methodLabel.Font = Enum.Font.SourceSans
+methodLabel.TextSize = 14
+methodLabel.Parent = mainFrame
+
+local methodButton = Instance.new("TextButton")
+methodButton.Size = UDim2.new(1, 0, 0, 25)
+methodButton.Position = UDim2.new(0, 0, 0, 75)
+methodButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+methodButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+methodButton.Text = "Change Method"
+methodButton.Font = Enum.Font.SourceSans
+methodButton.TextSize = 14
+methodButton.MouseButton1Click:Connect(function()
+    changeBypassMethod("EmojiReplacement")
+end)
+methodButton.Parent = mainFrame
+
+-- Function to update GUI
+local function updateGui()
+    methodLabel.Text = "Current Method: " .. (currentMethod == bypassMethods.ZeroWidthSpace and "ZeroWidthSpace" or "EmojiReplacement")
+    toggleButton.Text = isBypassEnabled and "Disable Bypass" or "Enable Bypass"
+end
+
+-- Initial GUI update
+updateGui()
